@@ -4,9 +4,11 @@ var app = angular.module("sampleApp", ["firebase"]);
 
 app.controller("SampleCtrl", function($scope, $firebase) {
 	$scope.signin = function(){
+    //Firebase.goOnline();
 		document.getElementById("signOut").style.visibility = "visible";
-  		$scope.ref =  new Firebase("https://interactive-lecture.firebaseio.com/Test/"+$scope.id+"/Questions").limitToLast(1);
       $scope.mainRef = new Firebase("https://interactive-lecture.firebaseio.com/Test/"+$scope.id);
+
+      $scope.ref = $scope.mainRef.child('Questions');
     
       
   		var sync = $firebase($scope.ref);
@@ -23,18 +25,17 @@ app.controller("SampleCtrl", function($scope, $firebase) {
   		return (current_value || 0) + 1;
 		});
   		
-  		$scope.ref.on("child_added",function(){
-			$scope.ref.once('value', function(allMessagesSnapshot) {
-  			allMessagesSnapshot.forEach(function(messageSnapshot) {
+  		$scope.ref.limitToLast(1).on("child_added",function(messageSnapshot){
+			
+  			
 				var time = messageSnapshot.child('time').val();
     			var type = messageSnapshot.child('type').val();
     			var diff = Date.now() - parseInt(time);
-    			console.log(diff);
     			if(diff <= 120000){
     				if (type === 1){
     				
     					alert("True or False");
-    				
+    				  
     				} 
     				else{
     					var str = "";
@@ -46,17 +47,18 @@ app.controller("SampleCtrl", function($scope, $firebase) {
     					}
     					alert(str.substring(0,str.length-1));
     				}
-    			}
-  			});
+    	}		
 		});
 			
-		})
+		
   	}
   	$scope.decrement = function(){
   		$scope.userRef.remove();
   	}
   	$scope.signout = function(){
-  			$scope.decrement();
+  		$scope.userRef.remove();
+      location.reload();
+      //Firebase.goOffline();
 		}
     $scope.mainRef = function(){
         $scope.decrement();
